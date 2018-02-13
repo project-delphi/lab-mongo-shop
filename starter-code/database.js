@@ -1,159 +1,147 @@
-const MongoDB = require('mongodb');
-const users = 'users';
-const products = 'products';
-const shoppingCarts = 'shoppingCarts';
+const MongoDB = require('mongodb')
+const users = 'users'
+const products = 'products'
+const shoppingCarts = 'shoppingCarts'
 
 class Database {
 
   constructor({ host, database }) {
-    this.url = `mongodb://${host}/${database}`;
+    this.url = `mongodb://${host}/${database}`
   }
 
   connect(callback = (error, database) => {}){
     if (this.database){
-      callback(null, this.database);
+      callback(null, this.database)
     } else {
       MongoDB.MongoClient.connect(this.url, (error, database) => {
         if (error){
-          callback(error);
+          callback(error)
         } else {
-          this.database = database;
-          callback(null, this.database);
+          this.database = database
+          callback(null, this.database)
         }
-      });
+      })
     }
   }
 
   close(callback = (error) => {}){
     if (this.database){
-      this.database.close(true, callback);
+      this.database.close(true, callback)
     } else {
-      callback();
+      callback()
     }
   }
-  // Insert a user
-  // user is the object to insert into the collection
-  // callback has two arguments error and result 
-  insertUser(user, callback = (error, result) => {}){
-    this.connect((error, database) => {
-      if (error){
-        callback(error);
-      } else {
-        // LAB 1
-        // Implement the query to insert a user
-        // user is the document that we want to insert
-        // remeber once it's finish to comment callback('Error inserting user');
-        
-        callback('Error inserting user');
-      }
-    });
+  
+  insertUser(user, callback = (error, result) => {}) {
+    this.connect(
+      this.onConnectFn(
+        crudInsertUser(user),
+        error, callback
+      )
+    )
   }
 
   listUsers(callback = (error, users) => {}) {
-    this.connect((error, database) => {
-      if (error){
-        callback(error);
-      } else {
-        //  LAB 2
-        // Implement the query to insert a user
-        // remeber once it's finish to comment callback('Error listing users');
-        
-        callback('Error listing users');
-      }
-    });
+    this.connect(
+      this.onConnectFn(
+        crudListUsers(),
+        error, callback
+      )
+    ) 
   }
 
-  deleteUser( firstName, callback = (error, result) => {}) {
-    this.connect((error, database) => {
-      if (error){
-        callback(error);
-      } else {
-        //  LAB 3
-        // Implement the query to delete a user
-        // firstName is the name of user that we want to delete
-        // remeber once it's finish to comment callback('Error deleting user');
-        
-        callback('Error deleting user');
-      }
-    });
+  deleteUser(firstName, callback = (error, result) => {}) {
+    this.connect(
+      this.onConnectFn(
+        crudDeleteUser(firstName),
+        error, callback
+      )
+    )
   }
 
   insertProduct(product, callback = (error, result) => {}){
-    this.connect((error, database) => {
-      if (error){
-        callback(error);
-      } else {
-        // LAB 4
-        // Implement the query to insert a product
-        // product is the document to insert
-        // remeber once it's finish to comment callback('Error inserting product');
-        
-        callback('Error inserting product');
-      }
-    });
+    this.connect(
+      this.onConnectFn(
+        crudInsertProduct(product),
+        error, callback
+      )
+    )
   }
 
   listProducts(callback = (error, products) => {}) {
-    this.connect((error, database) => {
-      if (error){
-        callback(error);
-      } else {
-        // LAB 5
-        // Implement the query to list all products
-        // remeber once it's finish to comment callback('Error listing products');
-        
-        callback('Error listing products');
-      }
-    });
+    this.connect(
+      this.onConnectFn(
+        crudListProducts(),
+        error, callback
+      )
+    )
   }
 
   deleteProduct( productName, callback = (error, result) => {}) {
-    this.connect((error, database) => {
-      if (error){
-        callback(error);
-      } else {
-        // LAB 6
-        // Implement the query to delete a product
-        // productName is the name of the producto to delete 
-        // remeber once it's finish to comment callback('Error deleting product');
-        
-        callback('Error deleting product');
-      }
-    });
+    this.connect(
+      this.onConnectFn(
+        crudDeleteProduct(productName),
+        error, callback
+      )
+    )
   }
 
   addProductToShoppingCart({userFirstName, productName}, callback = (error) => {}){
-    this.connect((error, database) => {
-      if (error) {
-        callback(error);
-      } else {
-        // LAB 7
-        // Implement the query to buy a product
-        // userFirstName is the name of user who purchase the product
-        // productName is the name of the product that we want to buy
-        // Think if you may need to implement two queries chained
-        // remeber once it's finish to comment callback('Error buying product');
-        
-        callback('Error buying product');
-      }
-    });
+    this.connect(
+      this.onConnectFn(
+        crudAddProductToShoppingCart(userFirstName, productName),
+        error, callback
+      )
+    )
   }
 
-  addReviewToProduct( {productName, review}, callback = (messageResult) => {}){
-    this.connect((error, database) => {
-      if (error) {
-        callback(error)
-      } else {
-        // LAB 8
-        // Implement the query to review a product
-        // productName is the name of the product to review
-        // review is the document to insert
-        // remeber once it's finish to comment callback('Error reviewing product');
-        
-        callback('Error reviewing product');
-      }
-    });
+  addReviewToProduct(productName, review, callback = (messageResult) => {}){
+    this.connect(
+      this.onConnectFn(
+        crudaddReviewToProduct(productName, review),
+        error, callback
+      )
+    )
   }
+
+  onConnectFn(crudFun, error, callback) {
+    error ? callback(error): crudFun()
+  }
+
+  crudInsertUser(user){
+    this.database.collections('users').insertOne(user)
+  }
+
+  crudListUsers(){
+    this.database.collections('users').find()
+  }
+
+  crudDeleteUser(firstName){
+    this.database.collections('users').remove({'firstName' : firstName})
+  }
+
+  crudInsertProduct(product){
+    this.database.collections('products').insertOne(product)
+  }
+
+  crudListProducts(){
+    this.database.collections('products').find().pretty()
+  }
+
+  crudDeleteProduct(productName){
+    this.database.collections('products').remove({'productName' : productName})
+
+  }
+
+  crudAddProductToShoppingCart(userFirstName, productName){
+    this.database.collections('users').update({},{$set : { }})
+  }
+
+  crudaddReviewToProduct(productName, review){
+    this.database.collections('product').update({},{$set : { }})
+  }
+
+
 }
 
-module.exports = Database;
+module.exports = Database
