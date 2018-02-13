@@ -117,7 +117,7 @@ class Database {
   }
 
   crudDeleteUser(firstName){
-    this.database.collections('users').remove({'firstName' : firstName})
+    this.database.collections('users').remove({'firstName' : firstName,{}})
   }
 
   crudInsertProduct(product){
@@ -129,16 +129,17 @@ class Database {
   }
 
   crudDeleteProduct(productName){
-    this.database.collections('products').remove({'productName' : productName})
+    this.database.collections('products').remove({'name' : productName},{})
 
   }
 
   crudAddProductToShoppingCart(userFirstName, productName){
-    this.database.collections('users').update({},{$set : { }})
+    this.database.collections('users').update({'firstName':userFirstName},
+      {$push : {'shoppingCart':productName }})
   }
 
   crudaddReviewToProduct(productName, review){
-    this.database.collections('product').update({},{$set : { }})
+    this.database.collections('product').update({"name": productName},{$push : {"reviews":review }})
   }
 
 
